@@ -1,0 +1,16 @@
+from flask import Flask
+from flask_migrate import Migrate
+from flask_sqlalchemy import SQLAlchemy
+
+from settings import Config
+
+URL_ORIGINAL_MAX_LENGTH = 2048
+URL_SHORT_MAX_LENGTH = 16
+URL_SHORT_AUTO_LENGTH = 6
+
+app = Flask(__name__)
+app.config.from_object(Config)
+db = SQLAlchemy(app)
+migrate = Migrate(app, db)
+
+from . import api_views, error_handlers, forms, models, utils, views
