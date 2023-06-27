@@ -7,6 +7,6 @@ class Config(object):
     )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SECRET_KEY = os.getenv(
-        'SECRET_KEY', default='ASFHUVHDFIUHVIEWFUGUHIHSFIOJSOAKFIJL'
+        'SECRET_KEY', default='123'
     )
     # JSON_SORT_KEYS = False
