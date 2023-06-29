@@ -14,21 +14,21 @@ EXIST_API = 'Имя "{name}" уже занято.'
 
 @app.route('/api/id/', methods=['POST'])
 def create_url_map():
-    try:
-        if request.data == b'':
-            raise InvalidAPIUsage(JSON_IS_EMPTY)
-        data = request.get_json()
-        if not data:
-            raise InvalidAPIUsage(JSON_IS_EMPTY)
-        return jsonify(
-            URLMap.handler(
-                original=data['url'], short=data.get('custom_id')
-            ).to_dict()
-        ), HTTPStatus.CREATED
-    except KeyError:
+    if request.data == b'':
+        raise InvalidAPIUsage(JSON_IS_EMPTY)
+    data = request.get_json()
+    if not data:
+        raise InvalidAPIUsage(JSON_IS_EMPTY)
+    if 'url' not in data:
         raise InvalidAPIUsage(JSON_NOT_FULL)
-    except NameError as error:
-        raise InvalidAPIUsage(EXIST_API.format(name=str(error).split()[1]))
+    try:
+        short = data.get('custom_id')
+        return jsonify(
+            URLMap.create(
+                original=data['url'], short=short).to_dict()
+        ), HTTPStatus.CREATED
+    except LookupError:
+        raise InvalidAPIUsage(EXIST_API.format(name=short))
     except ValueError as error:
         raise InvalidAPIUsage(str(error))
 

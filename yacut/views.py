@@ -7,9 +7,6 @@ from .forms import UrlForm
 from .models import REDIRECT_VIEW, URLMap
 
 
-HREF_CREATE = 'Ваша новая ссылка готова:'
-
-
 @app.route('/', methods=['GET', 'POST'])
 def index_view():
     form = UrlForm()
@@ -18,10 +15,9 @@ def index_view():
     try:
         return render_template(
             'index.html',
-            href_text=HREF_CREATE,
             form=form,
             short=url_for(
-                REDIRECT_VIEW, short=URLMap.handler(
+                REDIRECT_VIEW, short=URLMap.create(
                     original=form.original_link.data,
                     short=form.custom_id.data
                 ).short, _external=True

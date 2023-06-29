@@ -1,5 +1,6 @@
 import random
 import re
+from re import escape
 from datetime import datetime
 
 from flask import url_for
@@ -11,7 +12,7 @@ from .constant import (
 )
 
 
-SHORT_REGEX = re.compile(rf'^[{SYMBOLS_IN_SHORT}]*$')
+SHORT_REGEX = re.compile(rf'^[{escape(SYMBOLS_IN_SHORT)}]*$')
 LONG_SHORT = 'Указано недопустимое имя для короткой ссылки'
 EXIST = 'Имя {name} уже занято!'
 REDIRECT_VIEW = 'redirect_view'
@@ -27,8 +28,6 @@ def get_unique_short():
         )
         if not URLMap.get(short=short):
             return short
-    raise UserWarning(SHORT_GENERATE_ERROR)
-
 
 class URLMap(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -48,15 +47,6 @@ class URLMap(db.Model):
 
     @staticmethod
     def create(original, short):
-        url = URLMap(original=original, short=short)
-        db.session.add(url)
-        db.session.commit()
-        return url
-
-    @staticmethod
-    def handler(original, short):
-        if URLMap.query.filter_by(original=original).first():
-            raise NameError(EXIST.format(name=short))
         if not short:
             short = get_unique_short()
         elif (
@@ -64,4 +54,9 @@ class URLMap(db.Model):
             not re.search(SHORT_REGEX, short)
         ):
             raise ValueError(LONG_SHORT)
-        return URLMap.create(original=original, short=short)
+        elif URLMap.get(short):
+            raise LookupError(EXIST.format(name=short))
+        url = URLMap(original=original, short=short)
+        db.session.add(url)
+        db.session.commit()
+        return url

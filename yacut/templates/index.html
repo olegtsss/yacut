@@ -48,10 +48,8 @@
               </p>
             {% endfor %}
           {% endwith %}
-          {% if href_text %}
-            <h5 class="text-center"> {{ href_text }} </h5>
-          {% endif %}
           {% if short %}
+            <h5 class="text-center">Ваша новая ссылка готова:</h5>
             <h5 class="text-center">
               <a href="{{ short }}" class="link-secondary text-decoration-none">{{ short }}</a>
             </h5>
