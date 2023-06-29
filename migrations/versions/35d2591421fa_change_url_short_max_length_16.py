@@ -1,4 +1,4 @@
-"""change URL_SHORT_MAX_LENGTH = 16
+"""change SHORT_MAX_LENGTH = 16
 
 Revision ID: 35d2591421fa
 Revises: 

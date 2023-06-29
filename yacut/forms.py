@@ -1,12 +1,17 @@
 from flask_wtf import FlaskForm
 from wtforms import SubmitField, URLField
-from wtforms.validators import (DataRequired, Length, Optional, Regexp,
-                                ValidationError)
+from wtforms.validators import (
+    DataRequired, Length, Optional, Regexp, ValidationError
+)
 
-from .constant import (CREATE_BUTTON, CUSTOM_SHORT_LINK, EXIST, LONG_LINK,
-                       LONG_SHORT, REQUIRED_FIELD, SHORT_REGEX,
-                       URL_ORIGINAL_MAX_LENGTH, URL_SHORT_MAX_LENGTH)
-from .models import URLMap
+from .constant import SHORT_MAX_LENGTH, URL_ORIGINAL_MAX_LENGTH
+from .models import EXIST, LONG_SHORT, SHORT_REGEX, URLMap
+
+
+LONG_LINK = 'Длинная ссылка'
+REQUIRED_FIELD = 'Обязательное поле'
+CUSTOM_SHORT = 'Ваш вариант короткой ссылки'
+CREATE_BUTTON = 'Создать'
 
 
 class UrlForm(FlaskForm):
@@ -18,9 +23,9 @@ class UrlForm(FlaskForm):
         ]
     )
     custom_id = URLField(
-        CUSTOM_SHORT_LINK,
+        CUSTOM_SHORT,
         validators=[
-            Length(max=URL_SHORT_MAX_LENGTH),
+            Length(max=SHORT_MAX_LENGTH),
             Optional(),
             Regexp(SHORT_REGEX, message=LONG_SHORT)
         ]
@@ -28,5 +33,5 @@ class UrlForm(FlaskForm):
     submit = SubmitField(CREATE_BUTTON)
 
     def validate_custom_id(self, custom_id):
-        if custom_id.data and URLMap.get_by_short(short=custom_id.data):
+        if custom_id.data and URLMap.get(short=custom_id.data):
             raise ValidationError(EXIST.format(name=custom_id.data))

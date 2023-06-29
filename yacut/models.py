@@ -5,31 +5,35 @@ from datetime import datetime
 from flask import url_for
 
 from yacut import db
-
-from .constant import (EXIST, EXIST_API, LONG_SHORT, REDIRECT_VIEW,
-                       SHORT_GENERATE_COUNT, SHORT_GENERATE_ERROR, SHORT_REGEX,
-                       SYMBOLS_IN_SHORT, URL_ORIGINAL_MAX_LENGTH,
-                       URL_SHORT_AUTO_LENGTH, URL_SHORT_MAX_LENGTH)
-from .error_handlers import InvalidAPIUsage
+from .constant import (
+    SHORT_AUTO_LENGTH, SHORT_GENERATE_COUNT, SHORT_MAX_LENGTH,
+    SYMBOLS_IN_SHORT, URL_ORIGINAL_MAX_LENGTH
+)
 
 
-def get_unique_short_id():
-    short_id = ''.join(
-        random.sample(SYMBOLS_IN_SHORT, URL_SHORT_AUTO_LENGTH)
-    )
-    for attempt in range(SHORT_GENERATE_COUNT):
-        short_id = ''.join(
-            random.sample(SYMBOLS_IN_SHORT, URL_SHORT_AUTO_LENGTH)
+SHORT_REGEX = re.compile(rf'^[{SYMBOLS_IN_SHORT}]*$')
+LONG_SHORT = 'Указано недопустимое имя для короткой ссылки'
+EXIST = 'Имя {name} уже занято!'
+REDIRECT_VIEW = 'redirect_view'
+SHORT_GENERATE_ERROR = (
+    'При всех попытках генерации короткой ссылки '
+    'получено значение, которое имеется в базе.')
+
+
+def get_unique_short():
+    for _ in range(SHORT_GENERATE_COUNT):
+        short = ''.join(
+            random.sample(SYMBOLS_IN_SHORT, SHORT_AUTO_LENGTH)
         )
-        if not URLMap.get_by_short(short=short_id):
-            return short_id
-    raise ValueError(SHORT_GENERATE_ERROR.format(count=SHORT_GENERATE_COUNT))
+        if not URLMap.get(short=short):
+            return short
+    raise UserWarning(SHORT_GENERATE_ERROR)
 
 
 class URLMap(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     original = db.Column(db.String(URL_ORIGINAL_MAX_LENGTH), unique=True)
-    short = db.Column(db.String(URL_SHORT_MAX_LENGTH), unique=True)
+    short = db.Column(db.String(SHORT_MAX_LENGTH), unique=True)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
     def to_dict(self):
@@ -39,11 +43,7 @@ class URLMap(db.Model):
         )
 
     @staticmethod
-    def get_by_original(original):
-        return URLMap.query.filter_by(original=original).first()
-
-    @staticmethod
-    def get_by_short(short):
+    def get(short):
         return URLMap.query.filter_by(short=short).first()
 
     @staticmethod
@@ -54,46 +54,14 @@ class URLMap(db.Model):
         return url
 
     @staticmethod
-    def validate_symbol_in_short(short):
-        if re.search(SHORT_REGEX, short):
-            return True
-
-    @staticmethod
-    def validate_short(short):
+    def handler(original, short):
+        if URLMap.query.filter_by(original=original).first():
+            raise NameError(EXIST.format(name=short))
         if not short:
-            short = get_unique_short_id()
+            short = get_unique_short()
         elif (
-            not URLMap.validate_symbol_in_short(short) or
-            len(short) > URL_SHORT_MAX_LENGTH
+            len(short) > SHORT_MAX_LENGTH or
+            not re.search(SHORT_REGEX, short)
         ):
             raise ValueError(LONG_SHORT)
-        # Валидация "по базе" проходит в классе формы
-        # elif URLMap.get_by_short(short=short):
-        #     raise ValueError(EXIST.format(name=short))
-        return short
-
-    @staticmethod
-    def validate_original(original):
-        url = URLMap.get_by_original(original=original)
-        if url:
-            raise ValueError(EXIST.format(name=url.short))
-        return original
-
-    @staticmethod
-    def short_handler(form):
-        original = URLMap.validate_original(form.original_link.data)
-        short = URLMap.validate_short(form.custom_id.data)
-        URLMap.create(original=original, short=short)
-        return short
-
-    @staticmethod
-    def short_api_handler(data):
-        try:
-            original = URLMap.validate_original(data['url'])
-        except ValueError as error:
-            raise InvalidAPIUsage(EXIST_API.format(name=str(error).split()[1]))
-        try:
-            short = URLMap.validate_short(data.get('custom_id'))
-        except ValueError as error:
-            raise InvalidAPIUsage(str(error))
         return URLMap.create(original=original, short=short)

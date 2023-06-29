@@ -38,28 +38,27 @@
         </div>
       </div>
     </div>
-    {% with messages = get_flashed_messages(category_filter=["info"]) %}
-      {% for message in messages %}
-        <div class="container">
-          <div class="row ">
-            <div class="col-sm">
-            </div>
-            <div class="col-sm">
+    <div class="container">
+      <div class="row ">
+        <div class="col-sm">
+          {% with messages = get_flashed_messages() %}
+            {% for message in messages %}
               <p class="text-center">
-                <h5 class="text-center">{{ message}}</h5>
-                {% if short_link %}
-                  <h5 class="text-center">
-                    <a href="{{ short_link }}" class="link-secondary text-decoration-none">{{ short_link }}</a>
-                  </h5>
-                {% endif %}
+                <h5 class="text-center">{{ message }}</h5>
               </p>
-            </div>
-            <div class="col-sm">
-            </div>
-          </div>
+            {% endfor %}
+          {% endwith %}
+          {% if href_text %}
+            <h5 class="text-center"> {{ href_text }} </h5>
+          {% endif %}
+          {% if short %}
+            <h5 class="text-center">
+              <a href="{{ short }}" class="link-secondary text-decoration-none">{{ short }}</a>
+            </h5>
+          {% endif %}
         </div>
-      {% endfor %}
-    {% endwith %}
+      </div>
+    </div>
   </section>
 </main>
 {% endblock %}

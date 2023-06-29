@@ -20,8 +20,6 @@ python -m venv venv
 . venv/Scripts/activate
 python -m pip install --upgrade pip
 pip install -r requirements.txt
-flask db init
-flask db migrate -m "Start project"
 flask db upgrade
 flask run
 ```
