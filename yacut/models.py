@@ -29,6 +29,7 @@ def get_unique_short():
         if not URLMap.get(short=short):
             return short
 
+
 class URLMap(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     original = db.Column(db.String(URL_ORIGINAL_MAX_LENGTH), unique=True)
