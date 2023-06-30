@@ -1,7 +1,7 @@
 import random
 import re
-from re import escape
 from datetime import datetime
+from re import escape
 
 from flask import url_for
 
@@ -16,6 +16,7 @@ SHORT_REGEX = re.compile(rf'^[{escape(SYMBOLS_IN_SHORT)}]*$')
 LONG_SHORT = 'Указано недопустимое имя для короткой ссылки'
 EXIST = 'Имя {name} уже занято!'
 REDIRECT_VIEW = 'redirect_view'
+INDEX_API_VIEW = 'create_url_map'
 SHORT_GENERATE_ERROR = (
     'При всех попытках генерации короткой ссылки '
     'получено значение, которое имеется в базе.')
@@ -28,6 +29,7 @@ def get_unique_short():
         )
         if not URLMap.get(short=short):
             return short
+        return short
 
 
 class URLMap(db.Model):
@@ -50,14 +52,13 @@ class URLMap(db.Model):
     def create(original, short):
         if not short:
             short = get_unique_short()
-        elif (
-            len(short) > SHORT_MAX_LENGTH or
-            not re.search(SHORT_REGEX, short)
-        ):
+        elif not re.search(SHORT_REGEX, short):
             raise ValueError(LONG_SHORT)
         elif URLMap.get(short):
-            raise LookupError(EXIST.format(name=short))
-        url = URLMap(original=original, short=short)
-        db.session.add(url)
+            raise Exception(EXIST.format(name=short))
+        elif url_for(INDEX_API_VIEW) and len(short) > SHORT_MAX_LENGTH:
+            raise ValueError(LONG_SHORT)
+        url_map = URLMap(original=original, short=short)
+        db.session.add(url_map)
         db.session.commit()
-        return url
+        return url_map

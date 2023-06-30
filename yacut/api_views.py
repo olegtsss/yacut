@@ -27,10 +27,10 @@ def create_url_map():
             URLMap.create(
                 original=data['url'], short=short).to_dict()
         ), HTTPStatus.CREATED
-    except LookupError:
-        raise InvalidAPIUsage(EXIST_API.format(name=short))
     except ValueError as error:
         raise InvalidAPIUsage(str(error))
+    except Exception:
+        raise InvalidAPIUsage(EXIST_API.format(name=short))
 
 
 @app.route('/api/id/<short>/', methods=['GET'])

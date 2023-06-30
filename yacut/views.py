@@ -23,7 +23,7 @@ def index_view():
                 ).short, _external=True
             )
         )
-    except ValueError as error:
+    except Exception as error:
         flash(error)
         return render_template(
             'index.html',
