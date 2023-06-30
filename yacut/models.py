@@ -52,12 +52,12 @@ class URLMap(db.Model):
     def create(original, short):
         if not short:
             short = get_unique_short()
+        elif url_for(INDEX_API_VIEW) and len(short) > SHORT_MAX_LENGTH:
+            raise ValueError(LONG_SHORT)
         elif not re.search(SHORT_REGEX, short):
             raise ValueError(LONG_SHORT)
         elif URLMap.get(short):
             raise Exception(EXIST.format(name=short))
-        elif url_for(INDEX_API_VIEW) and len(short) > SHORT_MAX_LENGTH:
-            raise ValueError(LONG_SHORT)
         url_map = URLMap(original=original, short=short)
         db.session.add(url_map)
         db.session.commit()
