@@ -9,7 +9,6 @@ from .forms import UrlForm
 from .models import REDIRECT_VIEW, URLMap
 
 
-
 @app.route('/', methods=['GET', 'POST'])
 def index_view():
     form = UrlForm()
