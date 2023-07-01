@@ -1,4 +1,5 @@
 from http import HTTPStatus
+
 from flask import jsonify, render_template
 
 from . import app, db
@@ -31,3 +32,15 @@ def internal_error(error):
 @app.errorhandler(InvalidAPIUsage)
 def invalid_api_usage(error):
     return jsonify(error.to_dict()), error.status_code
+
+class Short_max_length_error(ValueError):
+    pass
+
+class Original_exist_error(ValueError):
+    pass
+
+class Short_exist_error(ValueError):
+    pass
+
+class Short_generate_error(ValueError):
+    pass

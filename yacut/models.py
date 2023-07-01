@@ -7,9 +7,11 @@ from flask import url_for
 
 from yacut import db
 from .constant import (
-    SHORT_AUTO_LENGTH, SHORT_GENERATE_COUNT, SHORT_MAX_LENGTH,
-    SYMBOLS_IN_SHORT, URL_ORIGINAL_MAX_LENGTH
-)
+    SHORT_AUTO_LENGTH, SHORT_GENERATE_COUNT, SHORT_MAX_LENGTH, SYMBOLS_IN_SHORT,
+    URL_ORIGINAL_MAX_LENGTH)
+from .error_handlers import (
+    Original_exist_error, Short_exist_error, Short_generate_error,
+    Short_max_length_error)
 
 
 SHORT_REGEX = re.compile(rf'^[{escape(SYMBOLS_IN_SHORT)}]*$')
@@ -29,7 +31,7 @@ def get_unique_short():
         )
         if not URLMap.get(short=short):
             return short
-        return short
+        raise Short_generate_error(SHORT_GENERATE_ERROR)
 
 
 class URLMap(db.Model):
@@ -49,15 +51,17 @@ class URLMap(db.Model):
         return URLMap.query.filter_by(short=short).first()
 
     @staticmethod
-    def create(original, short):
+    def create(original, short, view_name):
         if not short:
             short = get_unique_short()
-        elif url_for(INDEX_API_VIEW) and len(short) > SHORT_MAX_LENGTH:
-            raise ValueError(LONG_SHORT)
+        elif view_name == INDEX_API_VIEW and len(short) > SHORT_MAX_LENGTH:
+            raise Short_max_length_error(LONG_SHORT)
         elif not re.search(SHORT_REGEX, short):
             raise ValueError(LONG_SHORT)
+        elif view_name == INDEX_API_VIEW and URLMap.query.filter_by(original=original).first():
+            raise Original_exist_error(EXIST.format(name=short))
         elif URLMap.get(short):
-            raise Exception(EXIST.format(name=short))
+            raise Short_exist_error(EXIST.format(name=short))
         url_map = URLMap(original=original, short=short)
         db.session.add(url_map)
         db.session.commit()
