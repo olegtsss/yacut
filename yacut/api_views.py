@@ -4,9 +4,9 @@ from flask import jsonify, request
 
 from . import app
 from .error_handlers import (
-    InvalidAPIUsage, Original_exist_error, Short_exist_error,
-    Short_generate_error)
-from .models import INDEX_API_VIEW, URLMap
+    InvalidAPIUsage, OriginalExistError, ShortExistError, ShortGenerateError,
+    ShortMaxLengthError)
+from .models import URLMap
 
 
 ID_NOT_FOUND = 'Указанный id не найден'
@@ -30,13 +30,11 @@ def create_url_map():
             URLMap.create(
                 original=data['url'],
                 short=short,
-                view_name=INDEX_API_VIEW).to_dict(),
+                view_name='create_url_map').to_dict(),
         ), HTTPStatus.CREATED
-    except (Original_exist_error, Short_exist_error):
+    except (OriginalExistError, ShortExistError):
         raise InvalidAPIUsage(EXIST_API.format(name=short))
-    except Short_generate_error as error:
-        raise InvalidAPIUsage(str(error))
-    except ValueError as error:
+    except (ShortGenerateError, ShortMaxLengthError, ValueError) as error:
         raise InvalidAPIUsage(str(error))
 
 

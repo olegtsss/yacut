@@ -34,17 +34,17 @@ def invalid_api_usage(error):
     return jsonify(error.to_dict()), error.status_code
 
 
-class Short_max_length_error(ValueError):
+class ShortMaxLengthError(Exception):
     pass
 
 
-class Original_exist_error(ValueError):
+class OriginalExistError(Exception):
     pass
 
 
-class Short_exist_error(ValueError):
+class ShortExistError(Exception):
     pass
 
 
-class Short_generate_error(ValueError):
+class ShortGenerateError(Exception):
     pass
