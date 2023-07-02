@@ -65,11 +65,12 @@ class URLMap(db.Model):
                 raise ValueError(LONG_SHORT)
             if URLMap.get(short):
                 raise ShortExistError(EXIST.format(name=short))
-        if len(original) > URL_ORIGINAL_MAX_LENGTH:
-            raise ValueError(
-                ORIGINAL_LENGTH_ERROR.format(real_length=len(original)))
-        if not validators.url(original):
-            raise ValueError(ORIGINAL_ERROR.format(original=original))
+        if need_validation:
+            if len(original) > URL_ORIGINAL_MAX_LENGTH:
+                raise ValueError(
+                    ORIGINAL_LENGTH_ERROR.format(real_length=len(original)))
+            if not validators.url(original):
+                raise ValueError(ORIGINAL_ERROR.format(original=original))
         url_map = URLMap(original=original, short=short)
         db.session.add(url_map)
         db.session.commit()
