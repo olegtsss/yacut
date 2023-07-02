@@ -16,9 +16,11 @@ from .error_handlers import (
 
 SHORT_REGEX = re.compile(rf'^[{escape(SYMBOLS_IN_SHORT)}]*$')
 LONG_SHORT = 'Указано недопустимое имя для короткой ссылки'
-ORIGINAL_ERROR = (
-    'Указано не коректное значение для {original}. '
-    'Ожидал размер {max_length}, получен размер {real_length}')
+ORIGINAL_LENGTH_ERROR = (
+    'Указано не коректное значение для url. '
+    f'Максимальная длина {URL_ORIGINAL_MAX_LENGTH}, '
+    'получено значение {real_length}')
+ORIGINAL_ERROR = 'Указанное значение {original} не похоже на url'
 EXIST = 'Имя {name} уже занято!'
 REDIRECT_VIEW = 'redirect_view'
 SHORT_GENERATE_ERROR = (
@@ -61,19 +63,13 @@ class URLMap(db.Model):
                 raise ShortMaxLengthError(LONG_SHORT)
             if not re.search(SHORT_REGEX, short):
                 raise ValueError(LONG_SHORT)
-            if (
-                len(original) > URL_ORIGINAL_MAX_LENGTH or
-                not validators.url(original)
-            ):
-                raise ValueError(
-                    ORIGINAL_ERROR.format(
-                        original=original,
-                        max_length=URL_ORIGINAL_MAX_LENGTH,
-                        real_length=len(original)
-                    )
-                )
             if URLMap.get(short):
                 raise ShortExistError(EXIST.format(name=short))
+        if len(original) > URL_ORIGINAL_MAX_LENGTH:
+            raise ValueError(
+                ORIGINAL_LENGTH_ERROR.format(real_length=len(original)))
+        if not validators.url(original):
+            raise ValueError(ORIGINAL_ERROR.format(original=original))
         url_map = URLMap(original=original, short=short)
         db.session.add(url_map)
         db.session.commit()
