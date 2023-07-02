@@ -11,8 +11,7 @@ from .constant import (
     SHORT_AUTO_LENGTH, SHORT_GENERATE_COUNT, SHORT_MAX_LENGTH, SYMBOLS_IN_SHORT,
     URL_ORIGINAL_MAX_LENGTH)
 from .error_handlers import (
-    OriginalExistError, ShortExistError, ShortGenerateError,
-    ShortMaxLengthError)
+    ShortExistError, ShortGenerateError, ShortMaxLengthError)
 
 
 SHORT_REGEX = re.compile(rf'^[{escape(SYMBOLS_IN_SHORT)}]*$')
@@ -20,9 +19,10 @@ LONG_SHORT = 'Указано недопустимое имя для коротк
 ORIGINAL_ERROR = 'Указано не коректное значение для URL'
 EXIST = 'Имя {name} уже занято!'
 REDIRECT_VIEW = 'redirect_view'
-ShortGenerateError = (
-    'При всех попытках генерации короткой ссылки '
-    'получено значение, которое имеется в базе.')
+SHORT_GENERATE_ERROR = (
+    'При {count} попытках генерации короткой ссылки '
+    'получено значение, которое имеется в базе.'
+).format(count=SHORT_GENERATE_COUNT)
 
 
 def get_unique_short():
@@ -32,7 +32,7 @@ def get_unique_short():
         )
         if not URLMap.get(short=short):
             return short
-        raise ShortGenerateError(ShortGenerateError)
+        raise ShortGenerateError(SHORT_GENERATE_ERROR)
 
 
 class URLMap(db.Model):
@@ -52,19 +52,21 @@ class URLMap(db.Model):
         return URLMap.query.filter_by(short=short).first()
 
     @staticmethod
-    def create(original, short, view_name=None):
+    def create(original, short, need_validation=False):
         if not short:
             short = get_unique_short()
-        elif view_name and len(short) > SHORT_MAX_LENGTH:
+        elif need_validation and len(short) > SHORT_MAX_LENGTH:
             raise ShortMaxLengthError(LONG_SHORT)
-        elif view_name and not re.search(SHORT_REGEX, short):
-            raise ValueError(LONG_SHORT)
-        elif view_name and URLMap.query.filter_by(original=original).first():
-            raise OriginalExistError(EXIST.format(name=short))
-        elif view_name and not validators.url(original):
-            raise ValueError(ORIGINAL_ERROR)
-        elif URLMap.get(short):
-            raise ShortExistError(EXIST.format(name=short))
+        if need_validation:
+            if not re.search(SHORT_REGEX, short):
+                raise ValueError(LONG_SHORT)
+            if (
+                len(original) > URL_ORIGINAL_MAX_LENGTH or
+                not validators.url(original)
+            ):
+                raise ValueError(ORIGINAL_ERROR)
+            if URLMap.get(short):
+                raise ShortExistError(EXIST.format(name=short))
         url_map = URLMap(original=original, short=short)
         db.session.add(url_map)
         db.session.commit()

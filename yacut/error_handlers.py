@@ -38,10 +38,6 @@ class ShortMaxLengthError(Exception):
     pass
 
 
-class OriginalExistError(Exception):
-    pass
-
-
 class ShortExistError(Exception):
     pass
 

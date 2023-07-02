@@ -3,8 +3,7 @@ from http import HTTPStatus
 from flask import abort, flash, redirect, render_template, url_for
 
 from . import app
-from .error_handlers import (
-    OriginalExistError, ShortExistError, ShortGenerateError)
+from .error_handlers import ShortExistError, ShortGenerateError
 from .forms import UrlForm
 from .models import REDIRECT_VIEW, URLMap
 
@@ -25,7 +24,7 @@ def index_view():
                 ).short, _external=True
             )
         )
-    except (ShortGenerateError, OriginalExistError, ShortExistError) as error:
+    except (ShortGenerateError, ShortExistError) as error:
         flash(error)
         return render_template(
             'index.html',

@@ -4,8 +4,7 @@ from flask import jsonify, request
 
 from . import app
 from .error_handlers import (
-    InvalidAPIUsage, OriginalExistError, ShortExistError, ShortGenerateError,
-    ShortMaxLengthError)
+    InvalidAPIUsage, ShortExistError, ShortGenerateError, ShortMaxLengthError)
 from .models import URLMap
 
 
@@ -30,9 +29,9 @@ def create_url_map():
             URLMap.create(
                 original=data['url'],
                 short=short,
-                view_name='create_url_map').to_dict(),
+                need_validation=True).to_dict(),
         ), HTTPStatus.CREATED
-    except (OriginalExistError, ShortExistError):
+    except ShortExistError:
         raise InvalidAPIUsage(EXIST_API.format(name=short))
     except (ShortGenerateError, ShortMaxLengthError, ValueError) as error:
         raise InvalidAPIUsage(str(error))
