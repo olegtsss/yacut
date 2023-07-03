@@ -40,7 +40,7 @@ def get_unique_short():
 
 class URLMap(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    original = db.Column(db.String(URL_ORIGINAL_MAX_LENGTH), unique=True)
+    original = db.Column(db.String(URL_ORIGINAL_MAX_LENGTH),)
     short = db.Column(db.String(SHORT_MAX_LENGTH), unique=True)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
