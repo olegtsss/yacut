@@ -1,3 +1,7 @@
+# Cсылка на развернутый проект
+
+https://yacut.git.olegtsss.ru:5001
+
 # Описание проекта YaCut:
 
 Сервис укорачивания ссылок. Его назначение — ассоциировать длинную пользовательскую ссылку с короткой, которую предлагает сам пользователь или предоставляет сервис.
@@ -92,7 +96,7 @@ SECRET_KEY=AAAAAAAAAAAAAAAAAAAAAAAA
 ```
 
 ### Разработчик:
-[Тимощук Олег](https://github.com/olegtsss)
+[olegtsss](https://github.com/olegtsss)
 
 ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
 ![GitHub](https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=whte)
