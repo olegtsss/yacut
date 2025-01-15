@@ -1,6 +1,6 @@
 # Cсылка на развернутый проект
 
-https://yacut.git.olegtsss.ru:5001
+https://yacut.git.olegtsss.ru
 
 # Описание проекта YaCut:
 
